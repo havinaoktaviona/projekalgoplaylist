@@ -19,3 +19,8 @@ void jedaDetik(int detik) {
         // loop kosong sebagai pengganti sleep
     }
 }
+// Ubah satu huruf menjadi huruf kecil
+char hurufKecil(char c) {
+    if (c >= 'A' && c <= 'Z') return c + 32;
+    return c;
+}
