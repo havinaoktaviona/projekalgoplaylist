@@ -24,6 +24,8 @@ char hurufKecil(char c) {
     if (c >= 'A' && c <= 'Z') return c + 32;
     return c;
 }
+
+
 // Cek apakah needle ada di dalam haystack (tidak peduli besar/kecil huruf)
 // Kembalikan 1 jika ditemukan, 0 jika tidak
 int mengandungKata(const char *haystack, const char *needle) {
@@ -78,3 +80,36 @@ typedef struct {
 Lagu *head = NULL;
 Lagu *tail = NULL;
 
+// ============================================================
+// FUNGSI UTILITAS TAMPILAN
+// ============================================================
+
+void clearScreen() {
+    system("cls");
+}
+
+void pauseProgram() {
+    printf("\nTekan Enter untuk melanjutkan...");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    getchar();
+}
+
+void printGaris() {
+    printf("============================================================\n");
+}
+
+void printJudul(const char *judul) {
+    printGaris();
+    printf("   %s\n", judul);
+    printGaris();
+}
+
+int durasiKeDetik(int menit, int detik) {
+    return menit * 60 + detik;
+}
+
+void detikKeMenit(int totalDetik, int *menit, int *detik) {
+    *menit = totalDetik / 60;
+    *detik = totalDetik % 60;
+}
