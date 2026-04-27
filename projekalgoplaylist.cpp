@@ -24,3 +24,57 @@ char hurufKecil(char c) {
     if (c >= 'A' && c <= 'Z') return c + 32;
     return c;
 }
+// Cek apakah needle ada di dalam haystack (tidak peduli besar/kecil huruf)
+// Kembalikan 1 jika ditemukan, 0 jika tidak
+int mengandungKata(const char *haystack, const char *needle) {
+    int panjangHaystack = strlen(haystack);
+    int panjangNeedle   = strlen(needle);
+    int i, j, cocok;
+    for (i = 0; i <= panjangHaystack - panjangNeedle; i++) {
+        cocok = 1;
+        for (j = 0; j < panjangNeedle; j++) {
+            if (hurufKecil(haystack[i + j]) != hurufKecil(needle[j])) {
+                cocok = 0;
+                break;
+            }
+        }
+        if (cocok) return 1;
+    }
+    return 0;
+}
+
+// Bandingkan dua string tanpa peduli besar/kecil huruf
+// Kembalikan negatif jika a < b, 0 jika sama, positif jika a > b
+int bandingkanString(const char *a, const char *b) {
+    while (*a && *b) {
+        char ca = hurufKecil(*a);
+        char cb = hurufKecil(*b);
+        if (ca != cb) return ca - cb;
+        a++;
+        b++;
+    }
+    return hurufKecil(*a) - hurufKecil(*b);
+}
+
+// ================
+// STRUKTUR DATA
+// ================
+
+// Node Doubly Linked List untuk menyimpan data lagu
+typedef struct Lagu {
+    char judul[50];
+    char penyanyi[50];
+    int durasi;          // dalam detik
+    struct Lagu *next;
+    struct Lagu *prev;
+} Lagu;
+
+// Struktur data user untuk login
+typedef struct {
+    char username[30];
+    char password[30];
+} User;
+// Head dan tail playlist (Doubly Linked List)
+Lagu *head = NULL;
+Lagu *tail = NULL;
+
