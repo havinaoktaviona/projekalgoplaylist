@@ -381,3 +381,119 @@ void salinKeArray(Lagu **arr, int n) {
         curr = curr->next;
     }
 }
+
+
+// ============================================================
+// SEARCHING
+// ============================================================
+
+// --- Sequential Search berdasarkan Judul ---
+// Menelusuri linked list dari awal sampai akhir satu per satu
+void sequentialSearchJudul(const char *keyword) {
+    Lagu *curr = head;
+    int ditemukan = 0;
+    int no = 1;
+
+    printf("  [Sequential Search] Mencari judul yang mengandung \"%s\":\n\n", keyword);
+    printf("  %-4s %-30s %-25s %s\n", "No", "Judul", "Penyanyi", "Durasi");
+    printf("  ----  ------------------------------  -------------------------  --------\n");
+
+    // Telusuri setiap node dari head hingga NULL
+    while (curr != NULL) {
+        if (mengandungKata(curr->judul, keyword)) {
+            int m, s;
+            detikKeMenit(curr->durasi, &m, &s);
+            printf("  %-4d %-30s %-25s %02d:%02d\n",
+                   no, curr->judul, curr->penyanyi, m, s);
+            ditemukan++;
+        }
+        no++;
+        curr = curr->next;
+    }
+
+    if (ditemukan == 0)
+        printf("  [!] Judul yang mengandung \"%s\" tidak ditemukan.\n", keyword);
+    else
+        printf("\n  Ditemukan %d lagu.\n", ditemukan);
+}
+
+// --- Binary Search berdasarkan Penyanyi ---
+// Binary search membutuhkan data yang sudah terurut
+// Kita salin ke array, urutkan dulu dengan bubble sort, lalu binary search
+void binarySearchPenyanyi(const char *keyword) {
+    int n = hitungNode();
+    if (n == 0) {
+        printf("  [!] Playlist kosong.\n");
+        return;
+    }
+
+    // Salin linked list ke array pointer sementara
+    Lagu **arr = (Lagu **)malloc(n * sizeof(Lagu *));
+    if (!arr) {
+        printf("[!] Gagal alokasi memori.\n");
+        return;
+    }
+    salinKeArray(arr, n);
+
+    // Urutkan array berdasarkan penyanyi dulu (A-Z) agar binary search bisa bekerja
+    // Pakai bubble sort sederhana di sini karena hanya untuk kebutuhan search
+    int i, j;
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            if (bandingkanString(arr[j]->penyanyi, arr[j+1]->penyanyi) > 0) {
+                Lagu *tmp  = arr[j];
+                arr[j]     = arr[j+1];
+                arr[j+1]   = tmp;
+            }
+        }
+    }
+
+    printf("  [Binary Search] Mencari penyanyi \"%s\":\n", keyword);
+    printf("  (Data diurutkan A-Z dulu, lalu binary search dijalankan)\n\n");
+    printf("  %-4s %-30s %-25s %s\n", "No", "Judul", "Penyanyi", "Durasi");
+    printf("  ----  ------------------------------  -------------------------  --------\n");
+
+    // Binary search: cari posisi awal yang cocok
+    int kiri = 0, kanan = n - 1, tengah;
+    int posisiAwal = -1;
+
+    while (kiri <= kanan) {
+        tengah = (kiri + kanan) / 2;
+        int cmp = bandingkanString(arr[tengah]->penyanyi, keyword);
+
+        if (cmp == 0) {
+            posisiAwal = tengah; // Ketemu, catat posisi
+            kanan = tengah - 1; // Cari lagi ke kiri kalau ada yang sama
+        } else if (cmp < 0) {
+            kiri = tengah + 1;  // Keyword lebih besar, geser ke kanan
+        } else {
+            kanan = tengah - 1; // Keyword lebih kecil, geser ke kiri
+        }
+    }
+
+    int ditemukan = 0;
+    if (posisiAwal != -1) {
+        // Cetak semua hasil yang namanya sama persis (exact match)
+        // Cek juga ke kanan dari posisiAwal kalau ada nama penyanyi sama
+        int idx;
+        int no = 1;
+        for (idx = posisiAwal; idx < n; idx++) {
+            if (bandingkanString(arr[idx]->penyanyi, keyword) == 0) {
+                int m, s;
+                detikKeMenit(arr[idx]->durasi, &m, &s);
+                printf("  %-4d %-30s %-25s %02d:%02d\n",
+                       no++, arr[idx]->judul, arr[idx]->penyanyi, m, s);
+                ditemukan++;
+            } else {
+                break; // Sudah melewati nama penyanyi yang cocok
+            }
+        }
+    }
+
+    if (ditemukan == 0)
+        printf("  [!] Penyanyi \"%s\" tidak ditemukan.\n", keyword);
+    else
+        printf("\n  Ditemukan %d lagu dari penyanyi \"%s\".\n", ditemukan, keyword);
+
+    free(arr); // Bebaskan array sementara
+}
