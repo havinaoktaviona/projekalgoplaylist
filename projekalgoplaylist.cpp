@@ -196,3 +196,102 @@ void registrasi() {
     printf("\n[+] Akun berhasil dibuat! Silakan login.\n");
     pauseProgram();
 }
+
+// FIX 1: Login berhasil langsung masuk program, tidak perlu tekan Enter
+// Kembalikan 1 jika berhasil login
+int login(char *usernameAktif) {
+    #define MAKS_PERCOBAAN 3
+    #define JEDA_DETIK     30
+
+    int percobaan = 0;
+
+    while (1) {
+        clearScreen();
+        printJudul("LOGIN");
+
+        if (percobaan > 0) {
+            printf("  [!] Username/Password salah. Sisa percobaan: %d\n\n",
+                   MAKS_PERCOBAAN - percobaan);
+        }
+
+        char username[30], password[30];
+        printf("Username : ");
+        scanf("%29s", username);
+        printf("Password : ");
+        scanf("%29s", password);
+
+        if (verifikasiLogin(username, password)) {
+            strcpy(usernameAktif, username);
+            // FIX 1: Tidak ada pauseProgram(), langsung lanjut setelah jeda singkat
+            printf("\n[+] Login berhasil! Selamat datang, %s!\n", username);
+            jedaDetik(1);
+            return 1;
+        }
+
+        percobaan++;
+
+        if (percobaan >= MAKS_PERCOBAAN) {
+            printf("\n[!] Percobaan login habis!\n");
+            printf("    Akun dikunci sementara. Harap tunggu...\n\n");
+
+            int i;
+            for (i = JEDA_DETIK; i > 0; i--) {
+                printf("\r    Coba lagi dalam: %2d detik   ", i);
+                fflush(stdout);
+                jedaDetik(1);
+            }
+            printf("\r    Silakan coba login kembali.     \n");
+            pauseProgram();
+            percobaan = 0;
+        }
+    }
+}
+
+// Tampilan awal: login atau registrasi
+// Kembalikan 1 jika login berhasil, 0 jika user memilih keluar
+int menuAwal(char *usernameAktif) {
+    int pilihan;
+    while (1) {
+        clearScreen();
+        printJudul("PENGELOLA PLAYLIST MUSIK");
+        printf("  1. Login\n");
+        printf("  2. Registrasi Akun Baru\n");
+        printf("  0. Keluar\n");
+        printGaris();
+        printf("Pilihan: ");
+        scanf("%d", &pilihan);
+
+        switch (pilihan) {
+            case 1:
+                if (login(usernameAktif)) return 1;
+                break;
+            case 2:
+                registrasi();
+                break;
+            case 0:
+                printf("Sampai jumpa!\n");
+                return 0;
+            default:
+                printf("[!] Pilihan tidak valid.\n");
+                pauseProgram();
+        }
+    }
+}
+
+// ============================================================
+// MANAJEMEN LINKED LIST (PLAYLIST)
+// ============================================================
+
+Lagu *buatNode(const char *judul, const char *penyanyi, int durasi) {
+    Lagu *baru = (Lagu *)malloc(sizeof(Lagu));
+    if (!baru) {
+        printf("[!] Gagal alokasi memori!\n");
+        return NULL;
+    }
+    strncpy(baru->judul, judul, 49);
+    strncpy(baru->penyanyi, penyanyi, 49);
+    baru->durasi = durasi;
+    baru->next = NULL;
+    baru->prev = NULL;
+    return baru;
+}
