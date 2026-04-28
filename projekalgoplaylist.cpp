@@ -295,3 +295,89 @@ Lagu *buatNode(const char *judul, const char *penyanyi, int durasi) {
     baru->prev = NULL;
     return baru;
 }
+// Tambah lagu ke akhir list tanpa cetak pesan (dipakai saat load file)
+void tambahLaguDiam(const char *judul, const char *penyanyi, int durasi) {
+    Lagu *baru = buatNode(judul, penyanyi, durasi);
+    if (!baru) return;
+    if (!head) {
+        head = tail = baru;
+    } else {
+        baru->prev = tail;
+        tail->next = baru;
+        tail = baru;
+    }
+}
+
+// Tambah lagu ke akhir list dengan cetak konfirmasi
+void tambahLagu(const char *judul, const char *penyanyi, int durasi) {
+    tambahLaguDiam(judul, penyanyi, durasi);
+    printf("  [+] \"%s\" berhasil ditambahkan!\n", judul);
+}
+
+void hapusLagu(const char *judul) {
+    Lagu *curr = head;
+    while (curr) {
+        if (bandingkanString(curr->judul, judul) == 0) {
+            if (curr->prev) curr->prev->next = curr->next;
+            else            head = curr->next;
+            if (curr->next) curr->next->prev = curr->prev;
+            else            tail = curr->prev;
+            free(curr); // Bebaskan memori (free memory)
+            printf("[+] Lagu \"%s\" berhasil dihapus!\n", judul);
+            return;
+        }
+        curr = curr->next;
+    }
+    printf("[!] Lagu \"%s\" tidak ditemukan.\n", judul);
+}
+
+// FIX 4: Tampilkan playlist asli tanpa pengurutan apapun
+void tampilkanPlaylist() {
+    if (!head) {
+        printf("  [i] Playlist kosong.\n");
+        return;
+    }
+
+    int no = 1;
+    int totalDetik = 0;
+    Lagu *curr = head;
+
+    printf("  %-4s %-30s %-25s %s\n", "No", "Judul", "Penyanyi", "Durasi");
+    printf("  ----  ------------------------------  -------------------------  --------\n");
+
+    while (curr) {
+        int m, s;
+        detikKeMenit(curr->durasi, &m, &s);
+        printf("  %-4d %-30s %-25s %02d:%02d\n",
+               no++, curr->judul, curr->penyanyi, m, s);
+        totalDetik += curr->durasi;
+        curr = curr->next;
+    }
+
+    int tm, ts;
+    detikKeMenit(totalDetik, &tm, &ts);
+    printf("  ----\n");
+    printf("  Total lagu: %d | Total durasi: %02d:%02d\n", no - 1, tm, ts);
+}
+
+// ============================================================
+// FUNGSI BANTU ARRAY (dipakai oleh Searching dan Sorting)
+// ============================================================
+
+// Hitung jumlah node dalam linked list
+int hitungNode() {
+    int n = 0;
+    Lagu *curr = head;
+    while (curr) { n++; curr = curr->next; }
+    return n;
+}
+
+// Salin alamat node linked list ke dalam array pointer
+void salinKeArray(Lagu **arr, int n) {
+    Lagu *curr = head;
+    int i;
+    for (i = 0; i < n; i++) {
+        arr[i] = curr;
+        curr = curr->next;
+    }
+}
