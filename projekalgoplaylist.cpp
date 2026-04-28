@@ -113,3 +113,86 @@ void detikKeMenit(int totalDetik, int *menit, int *detik) {
     *menit = totalDetik / 60;
     *detik = totalDetik % 60;
 }
+
+// Cetak tabel dari array pointer lagu
+void cetakDariArray(Lagu **arr, int n) {
+    int no, totalDetik = 0;
+    printf("  %-4s %-30s %-25s %s\n", "No", "Judul", "Penyanyi", "Durasi");
+    printf("  ----  ------------------------------  -------------------------  --------\n");
+    for (no = 0; no < n; no++) {
+        int m, s;
+        detikKeMenit(arr[no]->durasi, &m, &s);
+        printf("  %-4d %-30s %-25s %02d:%02d\n",
+               no + 1, arr[no]->judul, arr[no]->penyanyi, m, s);
+        totalDetik += arr[no]->durasi;
+    }
+    int tm, ts;
+    detikKeMenit(totalDetik, &tm, &ts);
+    printf("  ----\n");
+    printf("  Total lagu: %d | Total durasi: %02d:%02d\n", n, tm, ts);
+}
+
+// ===================
+// SISTEM LOGIN
+// ===================
+
+#define FILE_USER "users.dat"
+
+void simpanUser(User u) {
+    FILE *f = fopen(FILE_USER, "ab");
+    if (f) {
+        fwrite(&u, sizeof(User), 1, f);
+        fclose(f);
+    }
+}
+
+int usernameAda(const char *username) {
+    FILE *f = fopen(FILE_USER, "rb");
+    if (!f) return 0;
+    User u;
+    while (fread(&u, sizeof(User), 1, f)) {
+        if (strcmp(u.username, username) == 0) {
+            fclose(f);
+            return 1;
+        }
+    }
+    fclose(f);
+    return 0;
+}
+
+int verifikasiLogin(const char *username, const char *password) {
+    FILE *f = fopen(FILE_USER, "rb");
+    if (!f) return 0;
+    User u;
+    while (fread(&u, sizeof(User), 1, f)) {
+        if (strcmp(u.username, username) == 0 &&
+            strcmp(u.password, password) == 0) {
+            fclose(f);
+            return 1;
+        }
+    }
+    fclose(f);
+    return 0;
+}
+
+void registrasi() {
+    clearScreen();
+    printJudul("REGISTRASI AKUN BARU");
+
+    User u;
+    printf("Masukkan username baru : ");
+    scanf("%29s", u.username);
+
+    if (usernameAda(u.username)) {
+        printf("\n[!] Username sudah digunakan. Coba username lain.\n");
+        pauseProgram();
+        return;
+    }
+
+    printf("Masukkan password      : ");
+    scanf("%29s", u.password);
+
+    simpanUser(u);
+    printf("\n[+] Akun berhasil dibuat! Silakan login.\n");
+    pauseProgram();
+}
