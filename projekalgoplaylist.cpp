@@ -383,9 +383,9 @@ void salinKeArray(Lagu **arr, int n) {
 }
 
 
-// ============================================================
+// ==================
 // SEARCHING
-// ============================================================
+// ==================
 
 // --- Sequential Search berdasarkan Judul ---
 // Menelusuri linked list dari awal sampai akhir satu per satu
@@ -496,4 +496,48 @@ void binarySearchPenyanyi(const char *keyword) {
         printf("\n  Ditemukan %d lagu dari penyanyi \"%s\".\n", ditemukan, keyword);
 
     free(arr); // Bebaskan array sementara
+}
+
+
+// --- Menu Cari Lagu ---
+// Pilih cari berdasarkan judul (sequential) atau penyanyi (binary)
+void menuCariLagu() {
+    clearScreen();
+    printJudul("CARI LAGU");
+
+    printf("  Cari berdasarkan:\n\n");
+    printf("  1. Judul    (Sequential Search)\n");
+    printf("  2. Penyanyi (Binary Search)\n");
+    printf("  0. Batal\n");
+    printGaris();
+    printf("Pilihan: ");
+
+    int pilihan;
+    scanf("%d", &pilihan);
+
+    if (pilihan == 0) return;
+
+    if (pilihan != 1 && pilihan != 2) {
+        printf("[!] Pilihan tidak valid.\n");
+        pauseProgram();
+        return;
+    }
+
+    char keyword[50];
+    if (pilihan == 1) {
+        printf("\nMasukkan judul lagu yang dicari: ");
+    } else {
+        printf("\nMasukkan nama penyanyi yang dicari: ");
+    }
+    scanf(" %49[^\n]", keyword);
+
+    printf("\n");
+
+    if (pilihan == 1) {
+        sequentialSearchJudul(keyword);
+    } else {
+        binarySearchPenyanyi(keyword);
+    }
+
+    pauseProgram();
 }
