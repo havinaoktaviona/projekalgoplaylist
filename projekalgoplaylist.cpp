@@ -541,3 +541,85 @@ void menuCariLagu() {
 
     pauseProgram();
 }
+
+// ============================================================
+// SORTING
+// Semua sort bekerja pada array pointer sementara
+// Linked list asli TIDAK diubah (FIX 4)
+// ============================================================
+
+// ---- FIX 7: BUBBLE SORT berdasarkan Judul ----
+// ascending = 1 berarti A-Z, ascending = 0 berarti Z-A
+void bubbleSortJudul(Lagu **arr, int n, int ascending) {
+    int i, j;
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            int cmp = bandingkanString(arr[j]->judul, arr[j+1]->judul);
+            // Tukar jika urutan tidak sesuai dengan arah yang dipilih
+            int perluTukar = ascending ? (cmp > 0) : (cmp < 0);
+            if (perluTukar) {
+                Lagu *tmp  = arr[j];
+                arr[j]     = arr[j+1];
+                arr[j+1]   = tmp;
+            }
+        }
+    }
+}
+
+// ---- FIX 8: QUICK SORT berdasarkan Penyanyi ----
+// Fungsi partisi untuk quick sort
+int partisiPenyanyi(Lagu **arr, int kiri, int kanan, int ascending) {
+    Lagu *pivot = arr[kanan]; // Pilih elemen paling kanan sebagai pivot
+    int i = kiri - 1;
+    int j;
+    for (j = kiri; j < kanan; j++) {
+        int cmp = bandingkanString(arr[j]->penyanyi, pivot->penyanyi);
+        int kondisi = ascending ? (cmp <= 0) : (cmp >= 0);
+        if (kondisi) {
+            i++;
+            Lagu *tmp = arr[i];
+            arr[i]    = arr[j];
+            arr[j]    = tmp;
+        }
+    }
+    // Tempatkan pivot di posisi yang benar
+    Lagu *tmp  = arr[i+1];
+    arr[i+1]   = arr[kanan];
+    arr[kanan] = tmp;
+    return i + 1;
+}
+
+// Fungsi rekursif quick sort
+void quickSortPenyanyi(Lagu **arr, int kiri, int kanan, int ascending) {
+    if (kiri < kanan) {
+        int posisiPivot = partisiPenyanyi(arr, kiri, kanan, ascending);
+        quickSortPenyanyi(arr, kiri,              posisiPivot - 1, ascending);
+        quickSortPenyanyi(arr, posisiPivot + 1,   kanan,           ascending);
+    }
+}
+
+// ---- FIX 9: SHELL SORT berdasarkan Durasi ----
+// ascending = 1 berarti terpendek dulu, ascending = 0 berarti terpanjang dulu
+void shellSortDurasi(Lagu **arr, int n, int ascending) {
+    int gap = n / 2; // Mulai dengan gap setengah ukuran array
+    while (gap > 0) {
+        int i;
+        for (i = gap; i < n; i++) {
+            Lagu *temp = arr[i];
+            int j = i;
+            while (j >= gap) {
+                int perluGeser = ascending
+                    ? (arr[j - gap]->durasi > temp->durasi)
+                    : (arr[j - gap]->durasi < temp->durasi);
+                if (perluGeser) {
+                    arr[j] = arr[j - gap];
+                    j -= gap;
+                } else {
+                    break;
+                }
+            }
+            arr[j] = temp;
+        }
+        gap /= 2; // Perkecil gap setiap putaran
+    }
+}
