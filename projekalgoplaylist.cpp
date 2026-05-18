@@ -623,3 +623,113 @@ void shellSortDurasi(Lagu **arr, int n, int ascending) {
         gap /= 2; // Perkecil gap setiap putaran
     }
 }
+
+// ---- FIX 4 + 7 + 8 + 9: Menu Urutkan ----
+// Hasil ditampilkan langsung di sini, linked list asli tidak berubah
+// Setelah tabel tampil, user diberi pilihan urutkan lagi atau kembali
+void menuUrutkan() {
+    if (!head) {
+        clearScreen();
+        printJudul("URUTKAN PLAYLIST");
+        printf("  [i] Playlist kosong.\n");
+        pauseProgram();
+        return;
+    }
+
+    // Loop: ulangi proses pengurutan selama user memilih "iya"
+    int urutkanLagi = 1;
+    while (urutkanLagi) {
+
+        int n = hitungNode();
+
+        // Buat array pointer sementara (tidak mengubah linked list asli)
+        Lagu **arr = (Lagu **)malloc(n * sizeof(Lagu *));
+        if (!arr) {
+            printf("[!] Gagal alokasi memori.\n");
+            return;
+        }
+        salinKeArray(arr, n);
+
+        int pilihan, arah;
+
+        clearScreen();
+        printJudul("URUTKAN PLAYLIST");
+        printf("  Pilih kriteria pengurutan:\n\n");
+        printf("  1. Berdasarkan Judul     (Bubble Sort)\n");
+        printf("  2. Berdasarkan Penyanyi  (Quick Sort)\n");
+        printf("  3. Berdasarkan Durasi    (Shell Sort)\n");
+        printf("  0. Batal\n");
+        printGaris();
+        printf("Pilihan: ");
+        scanf("%d", &pilihan);
+
+        if (pilihan == 0) {
+            free(arr);
+            return;
+        }
+        if (pilihan < 1 || pilihan > 3) {
+            printf("[!] Pilihan tidak valid.\n");
+            pauseProgram();
+            free(arr);
+            continue; // Ulangi loop dari awal
+        }
+
+        // Pilih arah pengurutan
+        printf("\n");
+        if (pilihan == 3) {
+            printf("  Pilih arah:\n");
+            printf("  1. Durasi terpendek dulu\n");
+            printf("  2. Durasi terpanjang dulu\n");
+        } else {
+            printf("  Pilih arah:\n");
+            printf("  1. A - Z  (ascending)\n");
+            printf("  2. Z - A  (descending)\n");
+        }
+        printf("Pilihan: ");
+        scanf("%d", &arah);
+
+        if (arah != 1 && arah != 2) {
+            printf("[!] Pilihan tidak valid.\n");
+            pauseProgram();
+            free(arr);
+            continue; // Ulangi loop dari awal
+        }
+
+        int ascending = (arah == 1) ? 1 : 0;
+
+        // Jalankan algoritma sorting sesuai pilihan
+        if      (pilihan == 1) bubbleSortJudul(arr, n, ascending);
+        else if (pilihan == 2) quickSortPenyanyi(arr, 0, n - 1, ascending);
+        else                   shellSortDurasi(arr, n, ascending);
+
+        // Tampilkan hasil tabel langsung di sini
+        clearScreen();
+        if (pilihan == 1) {
+            printf("  Hasil Urut Berdasarkan Judul (%s) - Bubble Sort\n\n",
+                   ascending ? "A - Z" : "Z - A");
+        } else if (pilihan == 2) {
+            printf("  Hasil Urut Berdasarkan Penyanyi (%s) - Quick Sort\n\n",
+                   ascending ? "A - Z" : "Z - A");
+        } else {
+            printf("  Hasil Urut Berdasarkan Durasi (%s) - Shell Sort\n\n",
+                   ascending ? "Terpendek dulu" : "Terpanjang dulu");
+        }
+
+        cetakDariArray(arr, n);
+        free(arr); // Bebaskan memori sementara
+
+        // Tanya user: ingin urutkan lagi atau tidak?
+        char jawaban[10];
+        printf("\n");
+        printGaris();
+        printf("  Ingin melakukan pengurutan lagi? (iya / tidak): ");
+        scanf("%9s", jawaban);
+
+        // Cek jawaban user
+        if (bandingkanString(jawaban, "iya") == 0) {
+            urutkanLagi = 1; // Kembali ke menu urutkan
+        } else {
+            urutkanLagi = 0; // Keluar ke pengelola playlist
+        }
+    }
+}
